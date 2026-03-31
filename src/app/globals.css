@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --color-brand: #2c1810;
+  --color-brand-light: #5c3a2e;
+  --color-warm: #f5e6d3;
+}
