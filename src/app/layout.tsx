@@ -8,8 +8,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "BON DEP Badstu – Booking",
-  description: "Book badstu hos BON DEP. Privat eller felles booking.",
+  title: "Chill Sauna – Booking",
+  description: "Book badstu hos Chill Sauna. Privat eller felles booking.",
 };
 
 export default function RootLayout({

@@ -24,7 +24,7 @@ export function Sidebar() {
   return (
     <aside className="w-64 bg-[var(--color-brand)] text-white min-h-screen flex flex-col">
       <div className="p-6">
-        <h1 className="text-lg font-bold">BON DEP Admin</h1>
+        <h1 className="text-lg font-bold">Chill Sauna Admin</h1>
       </div>
       <nav className="flex-1 px-3">
         {navItems.map((item) => (

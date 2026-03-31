@@ -5,7 +5,7 @@ export function Header() {
     <header className="bg-[var(--color-brand)] text-white">
       <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold tracking-tight">
-          BON DEP Badstu
+          Chill Sauna
         </Link>
         <Link
           href="/book"

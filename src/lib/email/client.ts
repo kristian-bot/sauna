@@ -24,7 +24,7 @@ export async function sendBookingConfirmation(params: SendBookingConfirmationPar
 
   const resend = getResend();
   await resend.emails.send({
-    from: process.env.EMAIL_FROM || 'booking@sauna.bondep.com',
+    from: process.env.EMAIL_FROM || 'booking@chillsauna.no',
     to,
     subject: `Bookingbekreftelse – ${saunaName} ${date}`,
     html: `
@@ -50,7 +50,7 @@ export async function sendBookingConfirmation(params: SendBookingConfirmationPar
         <p>Du kan også se bookingen din her: <a href="${bookingUrl}">${bookingUrl}</a></p>
 
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
-        <p style="color: #999; font-size: 12px;">BON DEP Badstu</p>
+        <p style="color: #999; font-size: 12px;">Chill Sauna</p>
       </div>
     `,
   });

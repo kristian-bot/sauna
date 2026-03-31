@@ -8,7 +8,7 @@ export default function Home() {
       <main className="flex-1 flex flex-col items-center justify-center px-4">
         <div className="max-w-2xl text-center space-y-8">
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--color-brand)]">
-            BON DEP Badstu
+            Chill Sauna
           </h1>
           <p className="text-lg text-stone-600 max-w-md mx-auto">
             Book din private badstu-opplevelse, eller bli med på en fellestur.

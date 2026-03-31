@@ -34,7 +34,7 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center mb-8">Admin – BON DEP Badstu</h1>
+        <h1 className="text-2xl font-bold text-center mb-8">Admin – Chill Sauna</h1>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 shadow-sm border border-stone-200 space-y-4">
           <div>
