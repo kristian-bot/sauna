@@ -11,15 +11,18 @@ VALUES ('sauna-images', 'sauna-images', true, 52428800, ARRAY['image/jpeg','imag
 ON CONFLICT (id) DO NOTHING;
 
 -- Storage policies
-CREATE POLICY IF NOT EXISTS "Public can view sauna images"
+DROP POLICY IF EXISTS "Public can view sauna images" ON storage.objects;
+CREATE POLICY "Public can view sauna images"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'sauna-images');
 
-CREATE POLICY IF NOT EXISTS "Authenticated users can upload sauna images"
+DROP POLICY IF EXISTS "Authenticated users can upload sauna images" ON storage.objects;
+CREATE POLICY "Authenticated users can upload sauna images"
   ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'sauna-images' AND auth.role() = 'authenticated');
 
-CREATE POLICY IF NOT EXISTS "Authenticated users can delete own sauna images"
+DROP POLICY IF EXISTS "Authenticated users can delete own sauna images" ON storage.objects;
+CREATE POLICY "Authenticated users can delete own sauna images"
   ON storage.objects FOR DELETE
   USING (bucket_id = 'sauna-images' AND auth.role() = 'authenticated');
 
