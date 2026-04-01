@@ -33,7 +33,6 @@ function CallbackContent() {
           return;
         }
 
-        // Still pending — retry
         if (attempts < 30) {
           setTimeout(() => setAttempts((a) => a + 1), 2000);
         } else {
@@ -48,37 +47,45 @@ function CallbackContent() {
   }, [bookingId, attempts, router]);
 
   return (
-    <div className="text-center py-16">
+    <div className="text-center py-16 sm:py-24">
       {status === 'checking' && (
-        <>
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-stone-300 border-t-[var(--color-brand)] mx-auto mb-6" />
-          <h1 className="text-2xl font-bold mb-2">Sjekker betaling...</h1>
-          <p className="text-stone-500">Vennligst vent mens vi bekrefter betalingen din.</p>
-        </>
+        <div className="space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-full bg-[var(--color-accent-light)] flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-3 border-[var(--color-accent)]/30 border-t-[var(--color-accent)]" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold">Bekrefter betaling...</h1>
+          <p className="text-stone-400 text-sm">Vennligst vent, dette tar bare noen sekunder.</p>
+        </div>
       )}
 
       {status === 'timeout' && (
-        <>
-          <h1 className="text-2xl font-bold mb-2">Tar litt tid...</h1>
-          <p className="text-stone-500 mb-4">
-            Betalingen tar lenger enn forventet. Du vil motta en e-postbekreftelse når betalingen er gjennomført.
+        <div className="space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-full bg-yellow-50 flex items-center justify-center text-3xl">
+            ⏳
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold">Tar litt tid...</h1>
+          <p className="text-stone-400 text-sm max-w-xs mx-auto">
+            Du vil motta en e-post når betalingen er bekreftet.
           </p>
-          <a href="/" className="text-[var(--color-brand)] underline">
-            Gå til forsiden
+          <a href="/" className="inline-block mt-4 text-[var(--color-accent)] font-medium text-sm">
+            Tilbake til forsiden
           </a>
-        </>
+        </div>
       )}
 
       {status === 'error' && (
-        <>
-          <h1 className="text-2xl font-bold mb-2">Noe gikk galt</h1>
-          <p className="text-stone-500 mb-4">
-            Kunne ikke sjekke betalingsstatus. Kontakt oss hvis du har blitt belastet.
+        <div className="space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-full bg-red-50 flex items-center justify-center text-3xl">
+            ⚠️
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold">Noe gikk galt</h1>
+          <p className="text-stone-400 text-sm max-w-xs mx-auto">
+            Kontakt oss hvis du har blitt belastet.
           </p>
-          <a href="/" className="text-[var(--color-brand)] underline">
-            Gå til forsiden
+          <a href="/" className="inline-block mt-4 text-[var(--color-accent)] font-medium text-sm">
+            Tilbake til forsiden
           </a>
-        </>
+        </div>
       )}
     </div>
   );
@@ -90,8 +97,8 @@ export default function BookCallback() {
       <Header />
       <Container>
         <Suspense fallback={
-          <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-stone-300 border-t-[var(--color-brand)]" />
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-accent)]" />
           </div>
         }>
           <CallbackContent />

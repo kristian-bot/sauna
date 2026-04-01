@@ -7,6 +7,14 @@ import { formatDateNorwegian, formatHourRange } from '@/lib/timezone';
 import { formatPriceNOK } from '@/lib/pricing';
 import type { BookingWithSlot } from '@/lib/types';
 
+const statusConfig: Record<string, { color: string; bg: string; label: string }> = {
+  confirmed: { color: 'text-green-700', bg: 'bg-green-50 border-green-200', label: 'Bekreftet' },
+  pending_payment: { color: 'text-yellow-700', bg: 'bg-yellow-50 border-yellow-200', label: 'Venter på betaling' },
+  cancelled: { color: 'text-red-700', bg: 'bg-red-50 border-red-200', label: 'Kansellert' },
+  expired: { color: 'text-stone-600', bg: 'bg-stone-50 border-stone-200', label: 'Utløpt' },
+  refunded: { color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200', label: 'Refundert' },
+};
+
 export default function BookingLookup({ params }: { params: Promise<{ qrToken: string }> }) {
   const { qrToken } = use(params);
   const [booking, setBooking] = useState<BookingWithSlot | null>(null);
@@ -17,11 +25,8 @@ export default function BookingLookup({ params }: { params: Promise<{ qrToken: s
     fetch(`/api/bookings/lookup?token=${qrToken}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data.booking) {
-          setBooking(data.booking);
-        } else {
-          setNotFound(true);
-        }
+        if (data.booking) setBooking(data.booking);
+        else setNotFound(true);
         setLoading(false);
       })
       .catch(() => {
@@ -35,8 +40,8 @@ export default function BookingLookup({ params }: { params: Promise<{ qrToken: s
       <div className="flex flex-col min-h-screen">
         <Header />
         <Container>
-          <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-brand)]" />
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-accent)]" />
           </div>
         </Container>
       </div>
@@ -48,9 +53,12 @@ export default function BookingLookup({ params }: { params: Promise<{ qrToken: s
       <div className="flex flex-col min-h-screen">
         <Header />
         <Container>
-          <div className="text-center py-16">
-            <h1 className="text-2xl font-bold mb-2">Booking ikke funnet</h1>
-            <p className="text-stone-500">Ugyldig eller utløpt QR-kode.</p>
+          <div className="text-center py-20">
+            <div className="w-16 h-16 mx-auto rounded-full bg-stone-100 flex items-center justify-center mb-4 text-2xl">
+              🔍
+            </div>
+            <h1 className="text-xl font-bold mb-2">Booking ikke funnet</h1>
+            <p className="text-stone-400 text-sm">Ugyldig eller utløpt QR-kode.</p>
           </div>
         </Container>
       </div>
@@ -58,63 +66,54 @@ export default function BookingLookup({ params }: { params: Promise<{ qrToken: s
   }
 
   const slot = booking.slot;
-  const statusColors: Record<string, string> = {
-    confirmed: 'bg-green-100 text-green-800',
-    pending_payment: 'bg-yellow-100 text-yellow-800',
-    cancelled: 'bg-red-100 text-red-800',
-    expired: 'bg-stone-100 text-stone-600',
-    refunded: 'bg-blue-100 text-blue-800',
-  };
-  const statusLabels: Record<string, string> = {
-    confirmed: 'Bekreftet',
-    pending_payment: 'Venter på betaling',
-    cancelled: 'Kansellert',
-    expired: 'Utløpt',
-    refunded: 'Refundert',
-  };
+  const status = statusConfig[booking.status] || statusConfig.expired;
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <Container>
-        <div className="max-w-lg mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Bookingdetaljer</h1>
+        {/* Status banner */}
+        <div className={`rounded-2xl p-4 border mb-6 flex items-center gap-3 ${status.bg}`}>
+          <div className={`w-3 h-3 rounded-full ${booking.status === 'confirmed' ? 'bg-green-500' : 'bg-stone-400'}`} />
+          <span className={`font-semibold text-sm ${status.color}`}>{status.label}</span>
+        </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-200">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-lg">{slot.sauna.name}</h2>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[booking.status] || 'bg-stone-100'}`}>
-                {statusLabels[booking.status] || booking.status}
-              </span>
+        {/* Booking details */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-200">
+          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-stone-100">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-accent-light)] flex items-center justify-center text-lg">
+              🧖
             </div>
+            <div>
+              <div className="font-semibold">{slot.sauna.name}</div>
+              <div className="text-xs text-stone-400 capitalize">{formatDateNorwegian(slot.date)}</div>
+            </div>
+          </div>
 
-            <dl className="space-y-3">
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Dato</dt>
-                <dd className="font-medium capitalize">{formatDateNorwegian(slot.date)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Tid</dt>
-                <dd className="font-medium">{formatHourRange(slot.hour)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Type</dt>
-                <dd className="font-medium">{booking.booking_type === 'private' ? 'Privat' : 'Felles'}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Antall</dt>
-                <dd className="font-medium">{booking.num_people} {booking.num_people === 1 ? 'person' : 'personer'}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Navn</dt>
-                <dd className="font-medium">{booking.customer_name}</dd>
-              </div>
-              <hr className="border-stone-100" />
-              <div className="flex justify-between text-lg">
-                <dt className="font-semibold">Pris</dt>
-                <dd className="font-bold">{formatPriceNOK(booking.price_nok)}</dd>
-              </div>
-            </dl>
+          <div className="grid grid-cols-3 gap-3 text-center mb-4">
+            <div>
+              <div className="text-xs text-stone-400 mb-0.5">Tid</div>
+              <div className="text-sm font-semibold">{formatHourRange(slot.hour)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-stone-400 mb-0.5">Type</div>
+              <div className="text-sm font-semibold">{booking.booking_type === 'private' ? 'Privat' : 'Felles'}</div>
+            </div>
+            <div>
+              <div className="text-xs text-stone-400 mb-0.5">Antall</div>
+              <div className="text-sm font-semibold">{booking.num_people} pers.</div>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-4 border-t border-stone-100">
+            <div className="flex justify-between text-sm">
+              <span className="text-stone-400">Navn</span>
+              <span className="font-medium">{booking.customer_name}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-stone-400 text-sm">Pris</span>
+              <span className="font-bold text-lg">{formatPriceNOK(booking.price_nok)}</span>
+            </div>
           </div>
         </div>
       </Container>

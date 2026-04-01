@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
@@ -10,6 +10,14 @@ const geistSans = Geist({
 export const metadata: Metadata = {
   title: "Chill Sauna – Booking",
   description: "Book badstu hos Chill Sauna. Privat eller felles booking.",
+  icons: { icon: "/favicon.ico" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#1a2f23",
 };
 
 export default function RootLayout({

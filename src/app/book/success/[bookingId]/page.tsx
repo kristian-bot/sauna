@@ -14,21 +14,13 @@ export default function BookingSuccess({ params }: { params: Promise<{ bookingId
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch booking details by looking up the booking ID via the API
     async function load() {
       try {
-        // First get the booking to get the qr_token
-        const res = await fetch(`/api/payments/status?booking_id=${bookingId}`);
-        const data = await res.json();
-
-        // Then look up the full booking
-        // We need another endpoint or use the booking_id to look up
         const lookupRes = await fetch(`/api/bookings/by-id?id=${bookingId}`);
         const lookupData = await lookupRes.json();
 
         if (lookupData.booking) {
           setBooking(lookupData.booking);
-          // Generate QR on client side for display
           const baseUrl = window.location.origin;
           setQrUrl(`${baseUrl}/booking/${lookupData.booking.qr_token}`);
         }
@@ -46,8 +38,8 @@ export default function BookingSuccess({ params }: { params: Promise<{ bookingId
       <div className="flex flex-col min-h-screen">
         <Header />
         <Container>
-          <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-brand)]" />
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-accent)]" />
           </div>
         </Container>
       </div>
@@ -59,9 +51,9 @@ export default function BookingSuccess({ params }: { params: Promise<{ bookingId
       <div className="flex flex-col min-h-screen">
         <Header />
         <Container>
-          <div className="text-center py-16">
-            <h1 className="text-2xl font-bold mb-2">Booking ikke funnet</h1>
-            <a href="/" className="text-[var(--color-brand)] underline">Gå til forsiden</a>
+          <div className="text-center py-20">
+            <h1 className="text-xl font-bold mb-2">Booking ikke funnet</h1>
+            <a href="/" className="text-[var(--color-accent)] font-medium text-sm">Til forsiden</a>
           </div>
         </Container>
       </div>
@@ -74,60 +66,70 @@ export default function BookingSuccess({ params }: { params: Promise<{ bookingId
     <div className="flex flex-col min-h-screen">
       <Header />
       <Container>
-        <div className="max-w-lg mx-auto text-center">
-          <div className="text-5xl mb-4">✓</div>
-          <h1 className="text-2xl font-bold mb-2">Booking bekreftet!</h1>
-          <p className="text-stone-500 mb-8">
-            En bekreftelse er sendt til {booking.customer_email}
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 mx-auto rounded-full bg-[var(--color-accent-light)] flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--color-brand)]">Booking bekreftet!</h1>
+          <p className="text-stone-400 text-sm mt-1">
+            Bekreftelse sendt til {booking.customer_email}
           </p>
+        </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-200 mb-8">
-            <dl className="space-y-3 text-left">
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Badstu</dt>
-                <dd className="font-medium">{slot.sauna.name}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Dato</dt>
-                <dd className="font-medium capitalize">{formatDateNorwegian(slot.date)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Tid</dt>
-                <dd className="font-medium">{formatHourRange(slot.hour)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Type</dt>
-                <dd className="font-medium">{booking.booking_type === 'private' ? 'Privat' : 'Felles'}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Antall</dt>
-                <dd className="font-medium">{booking.num_people} {booking.num_people === 1 ? 'person' : 'personer'}</dd>
-              </div>
-              <hr className="border-stone-100" />
-              <div className="flex justify-between text-lg">
-                <dt className="font-semibold">Betalt</dt>
-                <dd className="font-bold">{formatPriceNOK(booking.price_nok)}</dd>
-              </div>
-            </dl>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-200 mb-6">
+          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-stone-100">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-accent-light)] flex items-center justify-center text-lg">
+              🧖
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold">{slot.sauna.name}</div>
+              <div className="text-xs text-stone-400 capitalize">{formatDateNorwegian(slot.date)}</div>
+            </div>
           </div>
 
-          {qrUrl && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-200 mb-8">
-              <h2 className="font-semibold mb-4">Vis denne QR-koden ved ankomst</h2>
-              {/* QR code rendered via canvas on the booking lookup page */}
-              <div className="bg-stone-50 p-4 rounded-lg break-all text-sm text-stone-600">
-                <a href={qrUrl} className="text-[var(--color-brand)] underline">{qrUrl}</a>
-              </div>
+          <div className="grid grid-cols-3 gap-3 text-center mb-4">
+            <div>
+              <div className="text-xs text-stone-400 mb-0.5">Tid</div>
+              <div className="text-sm font-semibold">{formatHourRange(slot.hour)}</div>
             </div>
-          )}
+            <div>
+              <div className="text-xs text-stone-400 mb-0.5">Type</div>
+              <div className="text-sm font-semibold">{booking.booking_type === 'private' ? 'Privat' : 'Felles'}</div>
+            </div>
+            <div>
+              <div className="text-xs text-stone-400 mb-0.5">Antall</div>
+              <div className="text-sm font-semibold">{booking.num_people} pers.</div>
+            </div>
+          </div>
 
-          <a
-            href="/"
-            className="inline-block bg-[var(--color-brand)] text-white px-8 py-3 rounded-xl font-medium hover:bg-[var(--color-brand-light)] transition-colors"
-          >
-            Tilbake til forsiden
-          </a>
+          <div className="flex justify-between items-center pt-4 border-t border-stone-100">
+            <span className="text-stone-500">Betalt</span>
+            <span className="font-bold text-lg">{formatPriceNOK(booking.price_nok)}</span>
+          </div>
         </div>
+
+        {qrUrl && (
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-200 mb-6 text-center">
+            <p className="text-sm font-medium text-[var(--color-brand)] mb-3">
+              Vis QR-koden ved ankomst
+            </p>
+            <a
+              href={qrUrl}
+              className="inline-block bg-[var(--color-accent-light)] text-[var(--color-accent)] font-medium text-sm px-4 py-3 rounded-xl hover:bg-[var(--color-accent)]/20 transition-colors break-all"
+            >
+              Åpne bookingbevis →
+            </a>
+          </div>
+        )}
+
+        <a
+          href="/"
+          className="block w-full text-center bg-[var(--color-brand)] text-white py-4 rounded-2xl font-semibold active:scale-[0.98] transition-all"
+        >
+          Tilbake til forsiden
+        </a>
       </Container>
     </div>
   );

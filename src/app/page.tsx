@@ -5,42 +5,48 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 flex flex-col items-center justify-center px-4">
-        <div className="max-w-2xl text-center space-y-8">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--color-brand)]">
-            Chill Sauna
+
+      {/* Hero */}
+      <section className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-12 sm:py-20 bg-gradient-to-b from-[var(--color-warm)] to-stone-50">
+        <div className="max-w-lg text-center space-y-6">
+          <div className="inline-flex items-center gap-2 bg-[var(--color-accent-light)] text-[var(--color-accent)] px-4 py-1.5 rounded-full text-sm font-medium">
+            <span className="w-2 h-2 bg-[var(--color-accent)] rounded-full animate-pulse" />
+            9 badstuer tilgjengelig
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--color-brand)] leading-[1.1]">
+            Din neste<br />badstu-opplevelse
           </h1>
-          <p className="text-lg text-stone-600 max-w-md mx-auto">
-            Book din private badstu-opplevelse, eller bli med på en fellestur.
-            9 badstuer tilgjengelig.
+          <p className="text-base sm:text-lg text-stone-500 max-w-sm mx-auto leading-relaxed">
+            Book privat eller felles badstu. Enkel betaling med Vipps.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/book"
-              className="inline-flex items-center justify-center bg-[var(--color-brand)] text-white px-8 py-4 rounded-xl text-lg font-medium hover:bg-[var(--color-brand-light)] transition-colors"
-            >
-              Book nå
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8">
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="text-2xl mb-2">🧖</div>
-              <h3 className="font-semibold mb-1">Privat booking</h3>
-              <p className="text-sm text-stone-500">Hele badstuen for deg og dine. 2 000 kr/time.</p>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="text-2xl mb-2">👥</div>
-              <h3 className="font-semibold mb-1">Felles booking</h3>
-              <p className="text-sm text-stone-500">Del badstuen med andre. 200 kr/person.</p>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="text-2xl mb-2">📱</div>
-              <h3 className="font-semibold mb-1">Betal med Vipps</h3>
-              <p className="text-sm text-stone-500">Enkel og rask betaling. QR-kode som billett.</p>
-            </div>
-          </div>
+          <Link
+            href="/book"
+            className="inline-flex items-center justify-center bg-[var(--color-accent)] text-white px-8 py-4 rounded-2xl text-lg font-semibold hover:bg-[var(--color-accent)]/90 active:scale-[0.98] transition-all shadow-lg shadow-[var(--color-accent)]/20"
+          >
+            Book nå
+          </Link>
         </div>
-      </main>
+      </section>
+
+      {/* Features */}
+      <section className="px-4 sm:px-6 py-12 sm:py-16">
+        <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          {[
+            { icon: '🔒', title: 'Privat', desc: 'Hele badstuen for deg og dine.', detail: '2 000 kr/time' },
+            { icon: '👥', title: 'Felles', desc: 'Del badstuen med andre.', detail: '200 kr/person' },
+            { icon: '⚡', title: 'Vipps', desc: 'Betal raskt, få QR-billett.', detail: 'Enkel innsjekk' },
+          ].map((item) => (
+            <div key={item.title} className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-stone-100 hover:shadow-md transition-shadow">
+              <div className="text-2xl mb-3">{item.icon}</div>
+              <h3 className="font-semibold text-[var(--color-brand)] mb-1">{item.title}</h3>
+              <p className="text-sm text-stone-500 mb-2">{item.desc}</p>
+              <span className="text-xs font-medium text-[var(--color-accent)] bg-[var(--color-accent-light)] px-2.5 py-1 rounded-full">
+                {item.detail}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

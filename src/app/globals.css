@@ -2,7 +2,29 @@
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
-  --color-brand: #2c1810;
-  --color-brand-light: #5c3a2e;
-  --color-warm: #f5e6d3;
+  --color-brand: #1a2f23;
+  --color-brand-light: #2d4a38;
+  --color-accent: #4a9d6e;
+  --color-accent-light: #e8f5ee;
+  --color-warm: #f0f7f2;
+  --color-surface: #ffffff;
+}
+
+/* Smooth scrolling on mobile */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better input styling on iOS */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Safe area padding for notch devices */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
 }

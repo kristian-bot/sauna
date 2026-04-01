@@ -47,58 +47,66 @@ export default function BookStep2({ params }: { params: Promise<{ saunaId: strin
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <Container>
+      <Container className="pb-28 sm:pb-8">
         <StepIndicator currentStep={2} />
 
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">{saunaName || `Badstu ${saunaId}`}</h1>
-          <p className="text-stone-500 capitalize">{formatDateNorwegian(date)}</p>
+        {/* Context badge */}
+        <div className="bg-white rounded-2xl p-4 border border-stone-200 mb-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-accent-light)] flex items-center justify-center text-lg">
+            🧖
+          </div>
+          <div>
+            <div className="font-semibold text-sm">{saunaName || `Badstu ${saunaId}`}</div>
+            <div className="text-xs text-stone-400 capitalize">{formatDateNorwegian(date)}</div>
+          </div>
         </div>
 
-        {/* Booking type selector */}
-        <div className="mb-8">
-          <h2 className="text-lg font-medium mb-3">Velg bookingtype</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Booking type */}
+        <div className="mb-6">
+          <h2 className="text-base font-semibold text-[var(--color-brand)] mb-3">Bookingtype</h2>
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => { setBookingType('private'); setSelectedHour(null); }}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${
+              className={`p-4 rounded-2xl border-2 text-left transition-all active:scale-[0.97] ${
                 bookingType === 'private'
-                  ? 'border-[var(--color-brand)] bg-[var(--color-warm)]'
+                  ? 'border-[var(--color-accent)] bg-[var(--color-accent-light)]'
                   : 'border-stone-200 bg-white hover:border-stone-300'
               }`}
             >
-              <h3 className="font-semibold">Privat</h3>
-              <p className="text-sm text-stone-500 mt-1">Hele badstuen for deg. {PRIVATE_PRICE_NOK} kr/time.</p>
+              <div className="text-lg mb-1">🔒</div>
+              <h3 className="font-semibold text-sm">Privat</h3>
+              <p className="text-xs text-stone-400 mt-0.5">{PRIVATE_PRICE_NOK} kr/time</p>
             </button>
             <button
               onClick={() => { setBookingType('shared'); setSelectedHour(null); }}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${
+              className={`p-4 rounded-2xl border-2 text-left transition-all active:scale-[0.97] ${
                 bookingType === 'shared'
-                  ? 'border-[var(--color-brand)] bg-[var(--color-warm)]'
+                  ? 'border-[var(--color-accent)] bg-[var(--color-accent-light)]'
                   : 'border-stone-200 bg-white hover:border-stone-300'
               }`}
             >
-              <h3 className="font-semibold">Felles</h3>
-              <p className="text-sm text-stone-500 mt-1">Del med andre. {SHARED_PRICE_PER_PERSON_NOK} kr/person.</p>
+              <div className="text-lg mb-1">👥</div>
+              <h3 className="font-semibold text-sm">Felles</h3>
+              <p className="text-xs text-stone-400 mt-0.5">{SHARED_PRICE_PER_PERSON_NOK} kr/person</p>
             </button>
           </div>
         </div>
 
-        {/* Number of people (shared only) */}
+        {/* Number of people */}
         {bookingType === 'shared' && (
-          <div className="mb-8">
-            <h2 className="text-lg font-medium mb-3">Antall personer</h2>
-            <div className="flex items-center gap-4">
+          <div className="mb-6">
+            <h2 className="text-base font-semibold text-[var(--color-brand)] mb-3">Antall personer</h2>
+            <div className="flex items-center gap-3 bg-white rounded-2xl border border-stone-200 p-3 w-fit">
               <button
                 onClick={() => setNumPeople(Math.max(1, numPeople - 1))}
-                className="w-10 h-10 rounded-lg border border-stone-300 flex items-center justify-center hover:bg-stone-100"
+                className="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center text-lg font-medium hover:bg-stone-200 active:bg-stone-300 transition-colors"
               >
                 −
               </button>
-              <span className="text-xl font-medium w-8 text-center">{numPeople}</span>
+              <span className="text-2xl font-bold w-10 text-center tabular-nums">{numPeople}</span>
               <button
                 onClick={() => setNumPeople(numPeople + 1)}
-                className="w-10 h-10 rounded-lg border border-stone-300 flex items-center justify-center hover:bg-stone-100"
+                className="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center text-lg font-medium hover:bg-stone-200 active:bg-stone-300 transition-colors"
               >
                 +
               </button>
@@ -107,11 +115,11 @@ export default function BookStep2({ params }: { params: Promise<{ saunaId: strin
         )}
 
         {/* Time slots */}
-        <div className="mb-8">
-          <h2 className="text-lg font-medium mb-3">Velg tid</h2>
+        <div className="mb-6">
+          <h2 className="text-base font-semibold text-[var(--color-brand)] mb-3">Velg tid</h2>
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-brand)]" />
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-accent)]" />
             </div>
           ) : (
             <TimeSlotGrid
@@ -123,14 +131,34 @@ export default function BookStep2({ params }: { params: Promise<{ saunaId: strin
           )}
         </div>
 
+        {/* Desktop button */}
         <button
           onClick={handleNext}
           disabled={selectedHour === null}
-          className="bg-[var(--color-brand)] text-white px-8 py-3 rounded-xl font-medium hover:bg-[var(--color-brand-light)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="hidden sm:flex w-full bg-[var(--color-accent)] text-white py-4 rounded-2xl font-semibold text-lg hover:bg-[var(--color-accent)]/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed items-center justify-center gap-2"
         >
-          Gå til betaling →
+          Gå til betaling
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </Container>
+
+      {/* Sticky mobile bottom bar */}
+      {!loading && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4 sm:hidden">
+          <button
+            onClick={handleNext}
+            disabled={selectedHour === null}
+            className="w-full bg-[var(--color-accent)] text-white py-4 rounded-2xl font-semibold text-base active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            Gå til betaling
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

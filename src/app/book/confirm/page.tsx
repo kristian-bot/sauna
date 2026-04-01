@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Header } from '@/components/ui/Header';
 import { Container } from '@/components/ui/Container';
 import { StepIndicator } from '@/components/ui/StepIndicator';
 import { formatDateNorwegian, formatHourRange } from '@/lib/timezone';
-import { getPriceDisplay, calculatePrice, formatPriceNOK } from '@/lib/pricing';
+import { calculatePrice, formatPriceNOK } from '@/lib/pricing';
 import type { BookingType } from '@/lib/types';
 
 function ConfirmForm() {
@@ -54,7 +54,6 @@ function ConfirmForm() {
         throw new Error(data.error || 'Noe gikk galt');
       }
 
-      // Redirect to Vipps
       window.location.href = data.vipps_redirect_url;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Noe gikk galt');
@@ -65,106 +64,107 @@ function ConfirmForm() {
   return (
     <>
       <StepIndicator currentStep={3} />
-      <h1 className="text-2xl font-bold mb-6">Bekreft og betal</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Summary */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-200">
-          <h2 className="font-semibold text-lg mb-4">Oppsummering</h2>
-          <dl className="space-y-3">
-            <div className="flex justify-between">
-              <dt className="text-stone-500">Badstu</dt>
-              <dd className="font-medium">{saunaName}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-stone-500">Dato</dt>
-              <dd className="font-medium capitalize">{formatDateNorwegian(date)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-stone-500">Tid</dt>
-              <dd className="font-medium">{formatHourRange(hour)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-stone-500">Type</dt>
-              <dd className="font-medium">{bookingType === 'private' ? 'Privat' : 'Felles'}</dd>
-            </div>
-            {bookingType === 'shared' && (
-              <div className="flex justify-between">
-                <dt className="text-stone-500">Antall</dt>
-                <dd className="font-medium">{numPeople} {numPeople === 1 ? 'person' : 'personer'}</dd>
-              </div>
-            )}
-            <hr className="border-stone-100" />
-            <div className="flex justify-between">
-              <dt className="text-stone-500">Pris</dt>
-              <dd className="font-medium text-sm">{getPriceDisplay(bookingType, numPeople)}</dd>
-            </div>
-            <div className="flex justify-between text-lg">
-              <dt className="font-semibold">Totalt</dt>
-              <dd className="font-bold">{formatPriceNOK(priceOere)}</dd>
-            </div>
-          </dl>
+      {/* Order summary card */}
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-200 mb-6">
+        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-stone-100">
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-accent-light)] flex items-center justify-center text-lg">
+            🧖
+          </div>
+          <div className="flex-1">
+            <div className="font-semibold">{saunaName}</div>
+            <div className="text-xs text-stone-400 capitalize">{formatDateNorwegian(date)}</div>
+          </div>
+          <div className="text-right">
+            <div className="font-bold text-lg">{formatPriceNOK(priceOere)}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3 text-center">
+          <div>
+            <div className="text-xs text-stone-400 mb-0.5">Tid</div>
+            <div className="text-sm font-semibold">{formatHourRange(hour)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-stone-400 mb-0.5">Type</div>
+            <div className="text-sm font-semibold">{bookingType === 'private' ? 'Privat' : 'Felles'}</div>
+          </div>
+          <div>
+            <div className="text-xs text-stone-400 mb-0.5">Antall</div>
+            <div className="text-sm font-semibold">{numPeople} {numPeople === 1 ? 'pers.' : 'pers.'}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Customer form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <h2 className="text-base font-semibold text-[var(--color-brand)]">Dine opplysninger</h2>
+
+        <div>
+          <label className="block text-sm font-medium text-stone-600 mb-1.5">Navn</label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ola Nordmann"
+            autoComplete="name"
+            className="w-full px-4 py-3.5 rounded-xl border border-stone-300 bg-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 outline-none transition-all"
+          />
         </div>
 
-        {/* Customer form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <h2 className="font-semibold text-lg">Dine opplysninger</h2>
+        <div>
+          <label className="block text-sm font-medium text-stone-600 mb-1.5">E-post</label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="ola@eksempel.no"
+            autoComplete="email"
+            className="w-full px-4 py-3.5 rounded-xl border border-stone-300 bg-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 outline-none transition-all"
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Navn</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ola Nordmann"
-              className="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)] outline-none"
-            />
+        <div>
+          <label className="block text-sm font-medium text-stone-600 mb-1.5">Telefon</label>
+          <input
+            type="tel"
+            required
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="412 34 567"
+            autoComplete="tel"
+            className="w-full px-4 py-3.5 rounded-xl border border-stone-300 bg-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 outline-none transition-all"
+          />
+        </div>
+
+        {error && (
+          <div className="bg-red-50 text-red-700 px-4 py-3 rounded-xl text-sm border border-red-100 flex items-center gap-2">
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {error}
           </div>
+        )}
 
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">E-post</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ola@eksempel.no"
-              className="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Telefon</label>
-            <input
-              type="tel"
-              required
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="412 34 567"
-              className="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)] outline-none"
-            />
-          </div>
-
-          {error && (
-            <div className="bg-red-50 text-red-700 px-4 py-3 rounded-xl text-sm">
-              {error}
-            </div>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full bg-[#ff5b24] text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-[#e54d1a] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg shadow-[#ff5b24]/20"
+        >
+          {submitting ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+          ) : (
+            <>
+              Betal {formatPriceNOK(priceOere)} med Vipps
+            </>
           )}
+        </button>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-[#ff5b24] text-white px-8 py-4 rounded-xl font-medium text-lg hover:bg-[#e54d1a] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {submitting ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-            ) : (
-              'Betal med Vipps'
-            )}
-          </button>
-        </form>
-      </div>
+        <p className="text-xs text-center text-stone-400">
+          Du blir sendt til Vipps for å fullføre betalingen.
+        </p>
+      </form>
     </>
   );
 }
@@ -175,8 +175,8 @@ export default function BookConfirm() {
       <Header />
       <Container>
         <Suspense fallback={
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-brand)]" />
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-accent)]" />
           </div>
         }>
           <ConfirmForm />

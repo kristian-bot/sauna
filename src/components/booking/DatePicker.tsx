@@ -25,7 +25,6 @@ export function DatePicker({ selectedDate, onSelect }: DatePickerProps) {
   const days = useMemo(() => {
     const daysInMonth = getDaysInMonth(viewYear, viewMonth);
     const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-    // Adjust for Monday start (0 = Mon, 6 = Sun)
     const offset = firstDay === 0 ? 6 : firstDay - 1;
 
     const cells: (string | null)[] = [];
@@ -57,19 +56,29 @@ export function DatePicker({ selectedDate, onSelect }: DatePickerProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 max-w-sm">
+    <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-stone-200">
       <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="p-2 hover:bg-stone-100 rounded-lg text-stone-600">
-          ←
+        <button
+          onClick={prevMonth}
+          className="w-10 h-10 flex items-center justify-center hover:bg-stone-100 active:bg-stone-200 rounded-xl text-stone-600 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
-        <h3 className="font-medium capitalize">{formatMonthYear(viewYear, viewMonth)}</h3>
-        <button onClick={nextMonth} className="p-2 hover:bg-stone-100 rounded-lg text-stone-600">
-          →
+        <h3 className="font-semibold capitalize text-[var(--color-brand)]">{formatMonthYear(viewYear, viewMonth)}</h3>
+        <button
+          onClick={nextMonth}
+          className="w-10 h-10 flex items-center justify-center hover:bg-stone-100 active:bg-stone-200 rounded-xl text-stone-600 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-center">
         {['Ma', 'Ti', 'On', 'To', 'Fr', 'Lø', 'Sø'].map((d) => (
-          <div key={d} className="text-xs font-medium text-stone-400 py-1">
+          <div key={d} className="text-xs font-semibold text-stone-400 py-2 uppercase tracking-wide">
             {d}
           </div>
         ))}
@@ -85,14 +94,14 @@ export function DatePicker({ selectedDate, onSelect }: DatePickerProps) {
               key={dateStr}
               disabled={isPast}
               onClick={() => onSelect(dateStr)}
-              className={`py-2 rounded-lg text-sm transition-all ${
+              className={`w-full aspect-square flex items-center justify-center rounded-xl text-sm font-medium transition-all active:scale-90 ${
                 isPast
                   ? 'text-stone-300 cursor-not-allowed'
                   : isSelected
-                  ? 'bg-[var(--color-brand)] text-white font-medium'
+                  ? 'bg-[var(--color-accent)] text-white shadow-md shadow-[var(--color-accent)]/30 font-semibold'
                   : isToday
-                  ? 'bg-stone-100 font-medium hover:bg-stone-200'
-                  : 'hover:bg-stone-100'
+                  ? 'bg-[var(--color-accent-light)] text-[var(--color-accent)] font-semibold hover:bg-[var(--color-accent)]/20'
+                  : 'hover:bg-stone-100 active:bg-stone-200'
               }`}
             >
               {day}
