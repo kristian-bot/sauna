@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import type { MapSauna } from '@/lib/types';
 
@@ -18,11 +18,17 @@ const SaunaMarkerComponent = dynamic(
   { ssr: false }
 );
 
+const MapFlyer = dynamic(
+  () => import('./MapFlyer').then(m => ({ default: m.MapFlyer })),
+  { ssr: false }
+);
+
 interface SaunaMapProps {
   saunas: MapSauna[];
+  flyTo?: [number, number] | null;
 }
 
-export function SaunaMap({ saunas }: SaunaMapProps) {
+export function SaunaMap({ saunas, flyTo }: SaunaMapProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -58,6 +64,7 @@ export function SaunaMap({ saunas }: SaunaMapProps) {
           sauna={sauna}
         />
       ))}
+      {flyTo && <MapFlyer center={flyTo} />}
     </MapContainer>
   );
 }

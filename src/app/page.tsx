@@ -34,6 +34,21 @@ export default function Home() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [cityFilter, setCityFilter] = useState('');
+  const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
+  const [locating, setLocating] = useState(false);
+
+  function handleNearMe() {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setFlyTo([pos.coords.latitude, pos.coords.longitude]);
+        setLocating(false);
+      },
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
 
   function handleSearch(query: string) {
     setSearchQuery(query);
@@ -56,11 +71,26 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sauna count badge */}
-      <div className="absolute top-[160px] left-4 z-[1000]">
+      {/* Sauna count + nearby button */}
+      <div className="absolute top-[160px] left-4 z-[1000] flex items-center gap-2">
         <div className="bg-white/90 backdrop-blur-sm shadow-sm rounded-full px-3 py-1.5 text-xs font-medium text-stone-700">
           {saunas.length} badstuer
         </div>
+        <button
+          onClick={handleNearMe}
+          disabled={locating}
+          className="bg-white/90 backdrop-blur-sm shadow-sm rounded-full px-3 py-1.5 text-xs font-medium text-[var(--color-accent)] hover:bg-white transition-colors flex items-center gap-1.5 disabled:opacity-50"
+        >
+          {locating ? (
+            <span className="animate-spin inline-block w-3 h-3 border border-stone-300 border-t-[var(--color-accent)] rounded-full" />
+          ) : (
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a7 7 0 017 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 017-7z" />
+              <circle cx="12" cy="9" r="2.5" />
+            </svg>
+          )}
+          I nærheten
+        </button>
       </div>
 
       {/* Map */}
@@ -70,7 +100,7 @@ export default function Home() {
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-accent)]" />
           </div>
         ) : (
-          <SaunaMap saunas={saunas} />
+          <SaunaMap saunas={saunas} flyTo={flyTo} />
         )}
       </div>
 
