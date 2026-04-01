@@ -35,7 +35,6 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
   const [description, setDescription] = useState(initialData?.description || '');
   const [address, setAddress] = useState(initialData?.address || '');
   const [city, setCity] = useState(initialData?.city || '');
-  const [postalCode, setPostalCode] = useState('');
   const [lat, setLat] = useState<number | null>(initialData?.lat ?? null);
   const [lng, setLng] = useState<number | null>(initialData?.lng ?? null);
   const [capacity, setCapacity] = useState(initialData?.capacity || 10);
@@ -134,12 +133,10 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
       <LocationPicker
         address={address}
         city={city}
-        postalCode={postalCode}
         lat={lat}
         lng={lng}
         onAddressChange={setAddress}
         onCityChange={setCity}
-        onPostalCodeChange={setPostalCode}
         onCoordsChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }}
       />
 

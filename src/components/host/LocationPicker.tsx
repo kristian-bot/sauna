@@ -11,12 +11,7 @@ const TileLayer = dynamic(
   () => import('react-leaflet').then(m => m.TileLayer),
   { ssr: false }
 );
-const Marker = dynamic(
-  () => import('react-leaflet').then(m => m.Marker),
-  { ssr: false }
-);
 
-// Separate component for map events since useMapEvents needs to be inside MapContainer
 const DraggableMarkerInner = dynamic(
   () => import('./DraggableMarkerInner').then(m => ({ default: m.DraggableMarkerInner })),
   { ssr: false }
@@ -25,23 +20,16 @@ const DraggableMarkerInner = dynamic(
 interface LocationPickerProps {
   address: string;
   city: string;
-  postalCode: string;
   lat: number | null;
   lng: number | null;
   onAddressChange: (address: string) => void;
   onCityChange: (city: string) => void;
-  onPostalCodeChange: (postalCode: string) => void;
   onCoordsChange: (lat: number, lng: number) => void;
 }
 
-const CITIES = [
-  'Oslo', 'Bergen', 'Trondheim', 'Tromsø', 'Stavanger',
-  'Kristiansand', 'Bodø', 'Ålesund', 'Drammen', 'Fredrikstad',
-];
-
 export function LocationPicker({
-  address, city, postalCode, lat, lng,
-  onAddressChange, onCityChange, onPostalCodeChange, onCoordsChange,
+  address, city, lat, lng,
+  onAddressChange, onCityChange, onCoordsChange,
 }: LocationPickerProps) {
   const [mounted, setMounted] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
@@ -52,11 +40,9 @@ export function LocationPicker({
     setMounted(true);
   }, []);
 
-  const geocode = useCallback(async (addr: string, c: string, postal: string) => {
-    if (!c) return;
-
-    const parts = [addr, postal, c, 'Norge'].filter(Boolean);
-    const query = parts.join(', ');
+  const geocode = useCallback(async (addr: string, c: string) => {
+    const query = [addr, c, 'Norge'].filter(Boolean).join(', ');
+    if (query.length < 5) return;
 
     setGeocoding(true);
     setGeocodeMessage('');
@@ -70,12 +56,10 @@ export function LocationPicker({
       if (res.ok) {
         const results = await res.json();
         if (results.length > 0) {
-          const newLat = parseFloat(results[0].lat);
-          const newLng = parseFloat(results[0].lon);
-          onCoordsChange(newLat, newLng);
+          onCoordsChange(parseFloat(results[0].lat), parseFloat(results[0].lon));
           setGeocodeMessage('Foreslått plassering — dra markøren for å justere');
         } else {
-          setGeocodeMessage('Fant ikke adressen — plasser markøren manuelt');
+          setGeocodeMessage('Fant ikke adressen — prøv å være mer spesifikk, eller plasser markøren manuelt');
         }
       }
     } catch {
@@ -85,17 +69,16 @@ export function LocationPicker({
     }
   }, [onCoordsChange]);
 
-  // Debounced geocoding when address fields change
   useEffect(() => {
     if (!address && !city) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      geocode(address, city, postalCode);
+      geocode(address, city);
     }, 800);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [address, city, postalCode, geocode]);
+  }, [address, city, geocode]);
 
   const inputClass = 'w-full px-4 py-3 rounded-xl border border-stone-300 bg-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 outline-none transition-all';
 
@@ -104,29 +87,6 @@ export function LocationPicker({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">By</label>
-          <select value={city} onChange={e => onCityChange(e.target.value)} className={inputClass} required>
-            <option value="">Velg by</option>
-            {CITIES.map(c => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">Postnummer</label>
-          <input
-            type="text"
-            value={postalCode}
-            onChange={e => onPostalCodeChange(e.target.value)}
-            className={inputClass}
-            placeholder="0150"
-            maxLength={4}
-          />
-        </div>
-      </div>
-
       <div>
         <label className="block text-sm font-medium text-stone-600 mb-1.5">Adresse</label>
         <input
@@ -135,7 +95,19 @@ export function LocationPicker({
           value={address}
           onChange={e => onAddressChange(e.target.value)}
           className={inputClass}
-          placeholder="Gateadresse og nummer"
+          placeholder="F.eks. Strandveien 14, 0252 Oslo"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-stone-600 mb-1.5">Sted / by</label>
+        <input
+          type="text"
+          required
+          value={city}
+          onChange={e => onCityChange(e.target.value)}
+          className={inputClass}
+          placeholder="F.eks. Oslo, Lofoten, Hemsedal..."
         />
       </div>
 
