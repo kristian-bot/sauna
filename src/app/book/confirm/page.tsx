@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Header } from '@/components/ui/Header';
 import { Container } from '@/components/ui/Container';
 import { StepIndicator } from '@/components/ui/StepIndicator';
 import { formatDateNorwegian, formatHourRange } from '@/lib/timezone';
-import { calculatePrice, formatPriceNOK } from '@/lib/pricing';
-import type { BookingType } from '@/lib/types';
+import { formatPriceNOK, getSaunaPrice, calculatePrice } from '@/lib/pricing';
+import type { BookingType, Sauna } from '@/lib/types';
 
 function ConfirmForm() {
   const searchParams = useSearchParams();
@@ -24,8 +24,21 @@ function ConfirmForm() {
   const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [priceOere, setPriceOere] = useState(() => calculatePrice(bookingType, numPeople));
 
-  const priceOere = calculatePrice(bookingType, numPeople);
+  // Try to fetch actual sauna pricing
+  useEffect(() => {
+    if (!saunaId) return;
+    fetch(`/api/saunas`)
+      .then(r => r.json())
+      .then(data => {
+        const sauna = (data.saunas || []).find((s: Sauna) => s.id === parseInt(saunaId));
+        if (sauna) {
+          setPriceOere(getSaunaPrice(sauna as Sauna, bookingType, numPeople));
+        }
+      })
+      .catch(() => {/* use fallback price */});
+  }, [saunaId, bookingType, numPeople]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

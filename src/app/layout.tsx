@@ -8,8 +8,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Chill Sauna – Booking",
-  description: "Book badstu hos Chill Sauna. Privat eller felles booking.",
+  title: "Chill Sauna – Finn og book badstu i hele Norge",
+  description: "Norges markedsplass for badstu. Oppdag badstuer nær deg, book med Vipps, eller bli badstumester.",
   icons: { icon: "/favicon.ico" },
 };
 
@@ -27,6 +27,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="nb" className={`${geistSans.variable} h-full antialiased`}>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossOrigin=""
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-stone-50 text-stone-900 font-sans">
         {children}
       </body>

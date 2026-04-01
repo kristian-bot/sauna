@@ -7,12 +7,20 @@ export function Header() {
         <Link href="/" className="text-lg sm:text-xl font-bold tracking-tight">
           Chill Sauna
         </Link>
-        <Link
-          href="/book"
-          className="bg-[var(--color-accent)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--color-accent)]/90 active:scale-95 transition-all"
-        >
-          Book nå
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/host"
+            className="text-white/80 hover:text-white text-sm font-medium transition-colors hidden sm:inline"
+          >
+            Bli badstumester
+          </Link>
+          <Link
+            href="/"
+            className="bg-[var(--color-accent)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--color-accent)]/90 active:scale-95 transition-all"
+          >
+            Finn badstu
+          </Link>
+        </div>
       </div>
     </header>
   );

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { createBookingSchema } from '@/lib/validation';
-import { calculatePrice } from '@/lib/pricing';
+import { getSaunaPrice, calculateCommission } from '@/lib/pricing';
 import { createVippsPayment } from '@/lib/vipps/client';
 import { v4 as uuidv4 } from 'uuid';
-import type { ReserveSlotResult } from '@/lib/types';
+import type { ReserveSlotResult, Sauna } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -20,16 +20,18 @@ export async function POST(request: NextRequest) {
   const { sauna_id, date, hour, booking_type, num_people, customer_name, customer_email, customer_phone } = parsed.data;
   const supabase = createServiceClient();
 
-  // Get sauna capacity
+  // Get sauna with marketplace fields
   const { data: sauna } = await supabase
     .from('saunas')
-    .select('capacity, name')
+    .select('*')
     .eq('id', sauna_id)
     .single();
 
   if (!sauna) {
     return NextResponse.json({ error: 'Badstu ikke funnet' }, { status: 404 });
   }
+
+  const capacity = sauna.max_people || sauna.capacity;
 
   // Atomic slot reservation
   const { data: result, error: rpcError } = await supabase
@@ -38,8 +40,8 @@ export async function POST(request: NextRequest) {
       p_date: date,
       p_hour: hour,
       p_booking_type: booking_type,
-      p_num_people: booking_type === 'private' ? sauna.capacity : num_people,
-      p_capacity: sauna.capacity,
+      p_num_people: booking_type === 'private' ? capacity : num_people,
+      p_capacity: capacity,
     });
 
   if (rpcError) {
@@ -55,13 +57,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Calculate price
-  const priceOere = calculatePrice(booking_type, num_people);
+  // Calculate price dynamically from sauna
+  const priceOere = getSaunaPrice(sauna as Sauna, booking_type, num_people);
+  const { platformFee, hostPayout } = calculateCommission(priceOere);
 
   // Create booking
   const bookingId = uuidv4();
   const qrToken = uuidv4();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
   const { error: bookingError } = await supabase
     .from('bookings')
@@ -74,6 +77,8 @@ export async function POST(request: NextRequest) {
       customer_email,
       customer_phone,
       price_nok: priceOere,
+      platform_fee_oere: platformFee,
+      host_payout_oere: hostPayout,
       status: 'pending_payment',
       qr_token: qrToken,
       expires_at: expiresAt,
@@ -81,8 +86,7 @@ export async function POST(request: NextRequest) {
 
   if (bookingError) {
     console.error('Booking insert error:', bookingError);
-    // Release the slot
-    await supabase.rpc('release_slot', { p_slot_id: reservation.slot_id, p_num_people: booking_type === 'private' ? sauna.capacity : num_people });
+    await supabase.rpc('release_slot', { p_slot_id: reservation.slot_id, p_num_people: booking_type === 'private' ? capacity : num_people });
     return NextResponse.json({ error: 'Kunne ikke opprette booking' }, { status: 500 });
   }
 
@@ -100,11 +104,12 @@ export async function POST(request: NextRequest) {
       customerPhone: customer_phone,
     });
 
-    // Store payment record
     await supabase.from('payments').insert({
       booking_id: bookingId,
       vipps_reference: vippsReference,
       amount_oere: priceOere,
+      platform_fee_oere: platformFee,
+      host_amount_oere: hostPayout,
       status: 'created',
     });
 
@@ -114,9 +119,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error('Vipps payment creation failed:', err);
-    // Mark booking as failed and release slot
     await supabase.from('bookings').update({ status: 'expired' }).eq('id', bookingId);
-    await supabase.rpc('release_slot', { p_slot_id: reservation.slot_id, p_num_people: booking_type === 'private' ? sauna.capacity : num_people });
+    await supabase.rpc('release_slot', { p_slot_id: reservation.slot_id, p_num_people: booking_type === 'private' ? capacity : num_people });
     return NextResponse.json({ error: 'Kunne ikke starte betaling' }, { status: 500 });
   }
 }

@@ -2,12 +2,56 @@
 // Database types
 // ============================================================
 
+export interface Host {
+  id: string;
+  email: string;
+  name: string;
+  phone: string | null;
+  bio: string | null;
+  profile_image_url: string | null;
+  slug: string;
+  stripe_account_id: string | null;
+  is_verified: boolean;
+  created_at: string;
+}
+
 export interface Sauna {
   id: number;
   name: string;
   capacity: number;
   is_active: boolean;
   created_at: string;
+  // Marketplace fields
+  host_id: string | null;
+  slug: string | null;
+  description: string | null;
+  address: string | null;
+  city: string | null;
+  lat: number | null;
+  lng: number | null;
+  image_urls: string[];
+  private_price_oere: number | null;
+  shared_price_per_person_oere: number | null;
+  allowed_booking_types: string[];
+  min_people: number;
+  max_people: number | null;
+}
+
+export interface MapSauna {
+  id: number;
+  name: string;
+  slug: string;
+  city: string;
+  lat: number;
+  lng: number;
+  private_price_oere: number | null;
+  shared_price_per_person_oere: number | null;
+  image_urls: string[];
+  max_people: number;
+}
+
+export interface SaunaWithHost extends Sauna {
+  host: Host;
 }
 
 export interface Slot {
@@ -44,6 +88,8 @@ export interface Booking {
   expires_at: string | null;
   created_at: string;
   updated_at: string;
+  platform_fee_oere: number | null;
+  host_payout_oere: number | null;
 }
 
 export interface BookingWithSlot extends Booking {
@@ -68,6 +114,8 @@ export interface Payment {
   status: PaymentStatus;
   created_at: string;
   updated_at: string;
+  platform_fee_oere: number | null;
+  host_amount_oere: number | null;
 }
 
 export interface OpeningHours {
@@ -83,6 +131,42 @@ export interface AdminUser {
   id: string;
   email: string;
   role: string;
+}
+
+export type EventType = 'yoga' | 'breathing' | 'meditation' | 'custom';
+
+export interface Event {
+  id: string;
+  sauna_id: number;
+  title: string;
+  description: string | null;
+  event_type: EventType;
+  date: string;
+  start_hour: number;
+  duration_hours: number;
+  max_participants: number;
+  price_per_person_oere: number;
+  current_participants: number;
+  is_full: boolean;
+  created_at: string;
+}
+
+export interface EventWithSauna extends Event {
+  sauna: Sauna;
+}
+
+export interface EventBooking {
+  id: string;
+  event_id: string;
+  num_people: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  price_nok: number; // øre
+  status: BookingStatus;
+  qr_token: string;
+  expires_at: string | null;
+  created_at: string;
 }
 
 // ============================================================
@@ -115,6 +199,11 @@ export interface CreateBookingResponse {
 
 export interface ReserveSlotResult {
   slot_id: string;
+  success: boolean;
+  error_message: string | null;
+}
+
+export interface ReserveEventSlotResult {
   success: boolean;
   error_message: string | null;
 }
