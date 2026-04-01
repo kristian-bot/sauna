@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageUploader } from './ImageUploader';
+import { LocationPicker } from './LocationPicker';
 
 interface SaunaFormData {
   name: string;
   description: string | null;
   address: string | null;
   city: string | null;
+  lat: number | null;
+  lng: number | null;
   capacity: number;
   max_people: number | null;
   min_people: number;
@@ -23,11 +26,6 @@ interface SaunaFormProps {
   saunaId?: number;
 }
 
-const CITIES = [
-  'Oslo', 'Bergen', 'Trondheim', 'Tromsø', 'Stavanger',
-  'Kristiansand', 'Bodø', 'Ålesund', 'Drammen', 'Fredrikstad',
-];
-
 export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -37,6 +35,9 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
   const [description, setDescription] = useState(initialData?.description || '');
   const [address, setAddress] = useState(initialData?.address || '');
   const [city, setCity] = useState(initialData?.city || '');
+  const [postalCode, setPostalCode] = useState('');
+  const [lat, setLat] = useState<number | null>(initialData?.lat ?? null);
+  const [lng, setLng] = useState<number | null>(initialData?.lng ?? null);
   const [capacity, setCapacity] = useState(initialData?.capacity || 10);
   const [maxPeople, setMaxPeople] = useState(initialData?.max_people || 10);
   const [minPeople, setMinPeople] = useState(initialData?.min_people || 1);
@@ -69,11 +70,19 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
       return;
     }
 
+    if (!lat || !lng) {
+      setError('Velg plassering på kartet');
+      setSubmitting(false);
+      return;
+    }
+
     const payload = {
       name,
       description,
       address,
       city,
+      lat,
+      lng,
       capacity,
       max_people: maxPeople,
       min_people: minPeople,
@@ -122,23 +131,17 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
 
       <ImageUploader existingUrls={imageUrls} onImagesChange={setImageUrls} />
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">By</label>
-          <select value={city} onChange={e => setCity(e.target.value)} className={inputClass} required>
-            <option value="">Velg by</option>
-            {CITIES.map(c => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">Adresse</label>
-          <input type="text" required value={address} onChange={e => setAddress(e.target.value)} className={inputClass} placeholder="Gateadresse" />
-        </div>
-      </div>
-
-      <p className="text-xs text-stone-400">Koordinater beregnes automatisk fra adresse og by.</p>
+      <LocationPicker
+        address={address}
+        city={city}
+        postalCode={postalCode}
+        lat={lat}
+        lng={lng}
+        onAddressChange={setAddress}
+        onCityChange={setCity}
+        onPostalCodeChange={setPostalCode}
+        onCoordsChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }}
+      />
 
       <div className="grid grid-cols-3 gap-4">
         <div>
