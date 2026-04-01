@@ -42,14 +42,15 @@ export const createSaunaSchema = z.object({
   description: z.string().min(10, 'Beskrivelse må ha minst 10 tegn').max(1000),
   address: z.string().min(2).max(200),
   city: z.string().min(2).max(100),
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
+  lat: z.number().min(-90).max(90).optional(),
+  lng: z.number().min(-180).max(180).optional(),
   capacity: z.number().int().min(1).max(50),
   max_people: z.number().int().min(1).max(50),
   min_people: z.number().int().min(1).max(50).optional(),
   private_price_oere: z.number().int().min(0).nullable().optional(),
   shared_price_per_person_oere: z.number().int().min(0).nullable().optional(),
   allowed_booking_types: z.array(z.enum(['private', 'shared'])).min(1),
+  image_urls: z.array(z.string()).max(10).optional(),
 });
 
 export const updateSaunaSchema = createSaunaSchema.partial();

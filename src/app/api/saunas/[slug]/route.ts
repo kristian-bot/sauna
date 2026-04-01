@@ -30,5 +30,13 @@ export async function GET(
     .order('date', { ascending: true })
     .limit(10);
 
-  return NextResponse.json({ sauna, events: events || [] });
+  // Get reviews for this sauna
+  const { data: reviews } = await supabase
+    .from('reviews')
+    .select('id, customer_name, rating, comment, created_at, host_reply, host_reply_at')
+    .eq('sauna_id', sauna.id)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  return NextResponse.json({ sauna, events: events || [], reviews: reviews || [] });
 }

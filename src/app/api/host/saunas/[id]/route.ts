@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient, createServerSupabaseClient } from '@/lib/supabase/server';
 import { updateSaunaSchema } from '@/lib/validation';
+import { geocodeAddress } from '@/lib/geocoding';
 
 export async function PUT(
   request: NextRequest,
@@ -29,7 +30,7 @@ export async function PUT(
   // Verify ownership
   const { data: existing } = await service
     .from('saunas')
-    .select('host_id')
+    .select('host_id, lat, lng')
     .eq('id', parseInt(id))
     .single();
 
@@ -37,9 +38,23 @@ export async function PUT(
     return NextResponse.json({ error: 'Ikke tilgang' }, { status: 403 });
   }
 
+  const data = parsed.data;
+
+  // Geocode if address/city updated and no lat/lng provided
+  const updatePayload: Record<string, unknown> = { ...data };
+  if ((data.address || data.city) && !data.lat && !data.lng) {
+    const address = data.address || '';
+    const city = data.city || '';
+    if (address && city) {
+      const coords = await geocodeAddress(address, city);
+      updatePayload.lat = coords.lat;
+      updatePayload.lng = coords.lng;
+    }
+  }
+
   const { data: sauna, error } = await service
     .from('saunas')
-    .update(parsed.data)
+    .update(updatePayload)
     .eq('id', parseInt(id))
     .select()
     .single();

@@ -6,12 +6,13 @@ import { Header } from '@/components/ui/Header';
 import { Container } from '@/components/ui/Container';
 import { SaunaDetail } from '@/components/sauna/SaunaDetail';
 import { BookingWidget } from '@/components/sauna/BookingWidget';
-import type { SaunaWithHost, Event } from '@/lib/types';
+import type { SaunaWithHost, Event, Review } from '@/lib/types';
 
 export default function SaunaPage() {
   const { slug } = useParams<{ slug: string }>();
   const [sauna, setSauna] = useState<SaunaWithHost | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -24,6 +25,7 @@ export default function SaunaPage() {
       .then(data => {
         setSauna(data.sauna);
         setEvents(data.events || []);
+        setReviews(data.reviews || []);
         setLoading(false);
       })
       .catch(() => {
@@ -62,7 +64,7 @@ export default function SaunaPage() {
       <Container>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-4">
           <div className="lg:col-span-2">
-            <SaunaDetail sauna={sauna} events={events} />
+            <SaunaDetail sauna={sauna} events={events} reviews={reviews} />
           </div>
           <div className="lg:sticky lg:top-20 lg:self-start">
             <BookingWidget sauna={sauna} />

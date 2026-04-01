@@ -20,10 +20,9 @@ const SaunaMarkerComponent = dynamic(
 
 interface SaunaMapProps {
   saunas: MapSauna[];
-  onSaunaClick?: (sauna: MapSauna) => void;
 }
 
-export function SaunaMap({ saunas, onSaunaClick }: SaunaMapProps) {
+export function SaunaMap({ saunas }: SaunaMapProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -57,7 +56,6 @@ export function SaunaMap({ saunas, onSaunaClick }: SaunaMapProps) {
         <SaunaMarkerComponent
           key={sauna.id}
           sauna={sauna}
-          onClick={onSaunaClick}
         />
       ))}
     </MapContainer>

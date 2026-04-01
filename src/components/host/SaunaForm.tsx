@@ -2,20 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ImageUploader } from './ImageUploader';
 
 interface SaunaFormData {
   name: string;
   description: string | null;
   address: string | null;
   city: string | null;
-  lat: number | null;
-  lng: number | null;
   capacity: number;
   max_people: number | null;
   min_people: number;
   private_price_oere: number | null;
   shared_price_per_person_oere: number | null;
   allowed_booking_types: string[];
+  image_urls?: string[];
 }
 
 interface SaunaFormProps {
@@ -23,18 +23,10 @@ interface SaunaFormProps {
   saunaId?: number;
 }
 
-const CITIES_WITH_COORDS: Record<string, { lat: number; lng: number }> = {
-  'Oslo': { lat: 59.9139, lng: 10.7522 },
-  'Bergen': { lat: 60.3913, lng: 5.3221 },
-  'Trondheim': { lat: 63.4305, lng: 10.3951 },
-  'Tromsø': { lat: 69.6496, lng: 18.9560 },
-  'Stavanger': { lat: 58.9700, lng: 5.7331 },
-  'Kristiansand': { lat: 58.1462, lng: 7.9956 },
-  'Bodø': { lat: 67.2804, lng: 14.4049 },
-  'Ålesund': { lat: 62.4722, lng: 6.1495 },
-  'Drammen': { lat: 59.7441, lng: 10.2045 },
-  'Fredrikstad': { lat: 59.2181, lng: 10.9298 },
-};
+const CITIES = [
+  'Oslo', 'Bergen', 'Trondheim', 'Tromsø', 'Stavanger',
+  'Kristiansand', 'Bodø', 'Ålesund', 'Drammen', 'Fredrikstad',
+];
 
 export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
   const router = useRouter();
@@ -45,8 +37,6 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
   const [description, setDescription] = useState(initialData?.description || '');
   const [address, setAddress] = useState(initialData?.address || '');
   const [city, setCity] = useState(initialData?.city || '');
-  const [lat, setLat] = useState(initialData?.lat || 0);
-  const [lng, setLng] = useState(initialData?.lng || 0);
   const [capacity, setCapacity] = useState(initialData?.capacity || 10);
   const [maxPeople, setMaxPeople] = useState(initialData?.max_people || 10);
   const [minPeople, setMinPeople] = useState(initialData?.min_people || 1);
@@ -62,15 +52,7 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
   const [allowShared, setAllowShared] = useState(
     initialData?.allowed_booking_types?.includes('shared') ?? true
   );
-
-  function handleCitySelect(selectedCity: string) {
-    setCity(selectedCity);
-    const coords = CITIES_WITH_COORDS[selectedCity];
-    if (coords) {
-      setLat(coords.lat);
-      setLng(coords.lng);
-    }
-  }
+  const [imageUrls, setImageUrls] = useState<string[]>(initialData?.image_urls || []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -92,14 +74,13 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
       description,
       address,
       city,
-      lat,
-      lng,
       capacity,
       max_people: maxPeople,
       min_people: minPeople,
       private_price_oere: allowPrivate ? Math.round(privatePriceNok * 100) : null,
       shared_price_per_person_oere: allowShared ? Math.round(sharedPriceNok * 100) : null,
       allowed_booking_types: allowedTypes,
+      image_urls: imageUrls,
     };
 
     try {
@@ -139,12 +120,14 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
         <textarea required value={description} onChange={e => setDescription(e.target.value)} rows={3} className={inputClass} placeholder="Beskriv badstuen din..." />
       </div>
 
+      <ImageUploader existingUrls={imageUrls} onImagesChange={setImageUrls} />
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-stone-600 mb-1.5">By</label>
-          <select value={city} onChange={e => handleCitySelect(e.target.value)} className={inputClass} required>
+          <select value={city} onChange={e => setCity(e.target.value)} className={inputClass} required>
             <option value="">Velg by</option>
-            {Object.keys(CITIES_WITH_COORDS).map(c => (
+            {CITIES.map(c => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
@@ -155,16 +138,7 @@ export function SaunaForm({ initialData, saunaId }: SaunaFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">Breddegrad</label>
-          <input type="number" step="any" required value={lat} onChange={e => setLat(parseFloat(e.target.value))} className={inputClass} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">Lengdegrad</label>
-          <input type="number" step="any" required value={lng} onChange={e => setLng(parseFloat(e.target.value))} className={inputClass} />
-        </div>
-      </div>
+      <p className="text-xs text-stone-400">Koordinater beregnes automatisk fra adresse og by.</p>
 
       <div className="grid grid-cols-3 gap-4">
         <div>

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('saunas')
-    .select('id, name, slug, city, lat, lng, private_price_oere, shared_price_per_person_oere, image_urls, max_people, description, address')
+    .select('id, name, slug, city, lat, lng, private_price_oere, shared_price_per_person_oere, image_urls, max_people, description, address, average_rating, review_count')
     .eq('is_active', true)
     .not('slug', 'is', null);
 

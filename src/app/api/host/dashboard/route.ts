@@ -11,23 +11,41 @@ export async function GET() {
 
   const service = createServiceClient();
 
-  // Get host's saunas
+  // Get host's saunas with rating info
   const { data: saunas } = await service
     .from('saunas')
-    .select('id')
+    .select('id, name, average_rating, review_count')
     .eq('host_id', user.id);
 
-  const saunaIds = (saunas || []).map(s => s.id);
+  const saunaList = saunas || [];
+  const saunaIds = saunaList.map(s => s.id);
+
+  const emptyResponse = {
+    totalBookings: 0,
+    confirmedToday: 0,
+    totalRevenue: 0,
+    hostPayout: 0,
+    pendingPayments: 0,
+    overallRating: null as number | null,
+    totalReviews: 0,
+    saunaRatings: saunaList.map(s => ({
+      id: s.id,
+      name: s.name,
+      average_rating: s.average_rating,
+      review_count: s.review_count,
+    })),
+  };
 
   if (saunaIds.length === 0) {
-    return NextResponse.json({
-      totalBookings: 0,
-      confirmedToday: 0,
-      totalRevenue: 0,
-      hostPayout: 0,
-      pendingPayments: 0,
-    });
+    return NextResponse.json(emptyResponse);
   }
+
+  // Calculate overall rating
+  const ratedSaunas = saunaList.filter(s => s.average_rating !== null && s.review_count > 0);
+  const totalReviews = saunaList.reduce((sum, s) => sum + (s.review_count || 0), 0);
+  const overallRating = totalReviews > 0
+    ? ratedSaunas.reduce((sum, s) => sum + (s.average_rating || 0) * s.review_count, 0) / totalReviews
+    : null;
 
   // Get bookings for host's saunas via slots
   const { data: slots } = await service
@@ -39,11 +57,9 @@ export async function GET() {
 
   if (slotIds.length === 0) {
     return NextResponse.json({
-      totalBookings: 0,
-      confirmedToday: 0,
-      totalRevenue: 0,
-      hostPayout: 0,
-      pendingPayments: 0,
+      ...emptyResponse,
+      overallRating,
+      totalReviews,
     });
   }
 
@@ -71,5 +87,13 @@ export async function GET() {
     totalRevenue,
     hostPayout,
     pendingPayments: pendingRes.count || 0,
+    overallRating,
+    totalReviews,
+    saunaRatings: saunaList.map(s => ({
+      id: s.id,
+      name: s.name,
+      average_rating: s.average_rating,
+      review_count: s.review_count,
+    })),
   });
 }

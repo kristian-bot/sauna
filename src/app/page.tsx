@@ -45,10 +45,6 @@ export default function Home() {
     fetchSaunas(searchQuery, city);
   }
 
-  function handleSaunaClick(sauna: MapSauna) {
-    router.push(`/sauna/${sauna.slug}`);
-  }
-
   return (
     <div className="flex flex-col h-screen">
       <Header />
@@ -74,7 +70,7 @@ export default function Home() {
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-300 border-t-[var(--color-accent)]" />
           </div>
         ) : (
-          <SaunaMap saunas={saunas} onSaunaClick={handleSaunaClick} />
+          <SaunaMap saunas={saunas} />
         )}
       </div>
 

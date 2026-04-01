@@ -35,6 +35,8 @@ export interface Sauna {
   allowed_booking_types: string[];
   min_people: number;
   max_people: number | null;
+  average_rating: number | null;
+  review_count: number;
 }
 
 export interface MapSauna {
@@ -48,6 +50,8 @@ export interface MapSauna {
   shared_price_per_person_oere: number | null;
   image_urls: string[];
   max_people: number;
+  average_rating: number | null;
+  review_count: number;
 }
 
 export interface SaunaWithHost extends Sauna {
@@ -167,6 +171,19 @@ export interface EventBooking {
   qr_token: string;
   expires_at: string | null;
   created_at: string;
+}
+
+export interface Review {
+  id: string;
+  booking_id: string;
+  sauna_id: number;
+  customer_name: string;
+  customer_email: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  host_reply: string | null;
+  host_reply_at: string | null;
 }
 
 // ============================================================

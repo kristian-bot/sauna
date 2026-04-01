@@ -55,3 +55,38 @@ export async function sendBookingConfirmation(params: SendBookingConfirmationPar
     `,
   });
 }
+
+interface SendReviewRequestEmailParams {
+  to: string;
+  customerName: string;
+  saunaName: string;
+  reviewUrl: string;
+}
+
+export async function sendReviewRequestEmail(params: SendReviewRequestEmailParams) {
+  const { to, customerName, saunaName, reviewUrl } = params;
+
+  const resend = getResend();
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM || 'booking@chillsauna.no',
+    to,
+    subject: `Hvordan var ${saunaName}? Gi din vurdering`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #1a1a1a;">Hvordan var badstuen?</h1>
+        <p>Hei ${customerName},</p>
+        <p>Vi håper du hadde en fin opplevelse hos <strong>${saunaName}</strong>!</p>
+        <p>Vi ville satt stor pris på om du tok deg et øyeblikk til å gi en vurdering. Det hjelper andre med å finne gode badstuer.</p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${reviewUrl}" style="display: inline-block; background: #4a9d6e; color: white; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 600;">
+            Gi din vurdering
+          </a>
+        </div>
+
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+        <p style="color: #999; font-size: 12px;">Chill Sauna</p>
+      </div>
+    `,
+  });
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { HostShell } from '@/components/host/HostShell';
 import { formatPriceNOK } from '@/lib/pricing';
@@ -42,8 +43,18 @@ export default function HostSaunas() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {saunas.map(sauna => (
             <div key={sauna.id} className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
-              <div className="bg-[var(--color-warm)] h-32 flex items-center justify-center text-4xl">
-                🧖
+              <div className="relative h-32 bg-[var(--color-warm)]">
+                {sauna.image_urls && sauna.image_urls.length > 0 ? (
+                  <Image
+                    src={sauna.image_urls[0]}
+                    alt={sauna.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-4xl">🧖</div>
+                )}
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-[var(--color-brand)] mb-1">{sauna.name}</h3>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient, createServerSupabaseClient } from '@/lib/supabase/server';
 import { createSaunaSchema } from '@/lib/validation';
+import { geocodeAddress } from '@/lib/geocoding';
 import slugify from 'slugify';
 
 export async function GET() {
@@ -58,6 +59,15 @@ export async function POST(request: NextRequest) {
 
   const data = parsed.data;
 
+  // Geocode address if lat/lng not provided
+  let lat = data.lat;
+  let lng = data.lng;
+  if ((lat === undefined || lng === undefined) && data.address && data.city) {
+    const coords = await geocodeAddress(data.address, data.city);
+    lat = coords.lat;
+    lng = coords.lng;
+  }
+
   // Generate unique slug
   let slug = slugify(data.name, { lower: true, strict: true });
   const { data: existing } = await service
@@ -77,14 +87,15 @@ export async function POST(request: NextRequest) {
       description: data.description,
       address: data.address,
       city: data.city,
-      lat: data.lat,
-      lng: data.lng,
+      lat,
+      lng,
       capacity: data.capacity,
       max_people: data.max_people,
       min_people: data.min_people || 1,
       private_price_oere: data.private_price_oere ?? null,
       shared_price_per_person_oere: data.shared_price_per_person_oere ?? null,
       allowed_booking_types: data.allowed_booking_types,
+      image_urls: data.image_urls || [],
       host_id: user.id,
       slug,
       is_active: true,
