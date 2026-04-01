@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import type { MapSauna } from '@/lib/types';
 
@@ -23,12 +23,25 @@ const MapFlyer = dynamic(
   { ssr: false }
 );
 
+const MapBoundsTracker = dynamic(
+  () => import('./MapBoundsTracker').then(m => ({ default: m.MapBoundsTracker })),
+  { ssr: false }
+);
+
+export interface MapBounds {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}
+
 interface SaunaMapProps {
   saunas: MapSauna[];
   flyTo?: [number, number] | null;
+  onBoundsChange?: (bounds: MapBounds) => void;
 }
 
-export function SaunaMap({ saunas, flyTo }: SaunaMapProps) {
+export function SaunaMap({ saunas, flyTo, onBoundsChange }: SaunaMapProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -43,7 +56,6 @@ export function SaunaMap({ saunas, flyTo }: SaunaMapProps) {
     );
   }
 
-  // Center on Norway
   const defaultCenter: [number, number] = [63.0, 12.0];
   const defaultZoom = 5;
 
@@ -65,6 +77,7 @@ export function SaunaMap({ saunas, flyTo }: SaunaMapProps) {
         />
       ))}
       {flyTo && <MapFlyer center={flyTo} />}
+      {onBoundsChange && <MapBoundsTracker onBoundsChange={onBoundsChange} />}
     </MapContainer>
   );
 }
