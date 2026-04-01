@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { createBookingSchema } from '@/lib/validation';
 import { getSaunaPrice, calculateCommission } from '@/lib/pricing';
-import { createVippsPayment } from '@/lib/vipps/client';
 import { v4 as uuidv4 } from 'uuid';
 import type { ReserveSlotResult, Sauna } from '@/lib/types';
 
@@ -61,10 +60,9 @@ export async function POST(request: NextRequest) {
   const priceOere = getSaunaPrice(sauna as Sauna, booking_type, num_people);
   const { platformFee, hostPayout } = calculateCommission(priceOere);
 
-  // Create booking
+  // Create booking — directly confirmed (demo mode, no payment)
   const bookingId = uuidv4();
   const qrToken = uuidv4();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
   const { error: bookingError } = await supabase
     .from('bookings')
@@ -79,9 +77,9 @@ export async function POST(request: NextRequest) {
       price_nok: priceOere,
       platform_fee_oere: platformFee,
       host_payout_oere: hostPayout,
-      status: 'pending_payment',
+      status: 'confirmed',
       qr_token: qrToken,
-      expires_at: expiresAt,
+      expires_at: null,
     });
 
   if (bookingError) {
@@ -90,37 +88,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Kunne ikke opprette booking' }, { status: 500 });
   }
 
-  // Create Vipps payment
+  // Create mock payment record
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
-  const vippsReference = `SAUNA-${bookingId.slice(0, 8).toUpperCase()}`;
+  const vippsReference = `DEMO-${bookingId.slice(0, 8).toUpperCase()}`;
 
-  try {
-    const vippsResult = await createVippsPayment({
-      reference: vippsReference,
-      amount: priceOere,
-      description: `Badstu: ${sauna.name} ${date} kl ${hour}:00`,
-      callbackUrl: `${baseUrl}/api/webhooks/vipps`,
-      returnUrl: `${baseUrl}/book/callback?booking_id=${bookingId}`,
-      customerPhone: customer_phone,
-    });
+  await supabase.from('payments').insert({
+    booking_id: bookingId,
+    vipps_reference: vippsReference,
+    amount_oere: priceOere,
+    platform_fee_oere: platformFee,
+    host_amount_oere: hostPayout,
+    status: 'captured',
+  });
 
-    await supabase.from('payments').insert({
-      booking_id: bookingId,
-      vipps_reference: vippsReference,
-      amount_oere: priceOere,
-      platform_fee_oere: platformFee,
-      host_amount_oere: hostPayout,
-      status: 'created',
-    });
-
-    return NextResponse.json({
-      booking_id: bookingId,
-      vipps_redirect_url: vippsResult.url,
-    });
-  } catch (err) {
-    console.error('Vipps payment creation failed:', err);
-    await supabase.from('bookings').update({ status: 'expired' }).eq('id', bookingId);
-    await supabase.rpc('release_slot', { p_slot_id: reservation.slot_id, p_num_people: booking_type === 'private' ? capacity : num_people });
-    return NextResponse.json({ error: 'Kunne ikke starte betaling' }, { status: 500 });
-  }
+  return NextResponse.json({
+    booking_id: bookingId,
+    // Skip Vipps — redirect straight to success
+    vipps_redirect_url: `${baseUrl}/book/success/${bookingId}`,
+  });
 }

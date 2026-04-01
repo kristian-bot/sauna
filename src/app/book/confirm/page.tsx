@@ -163,19 +163,19 @@ function ConfirmForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-[#ff5b24] text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-[#e54d1a] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg shadow-[#ff5b24]/20"
+          className="w-full bg-[var(--color-accent)] text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-[var(--color-accent)]/90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg shadow-[var(--color-accent)]/20"
         >
           {submitting ? (
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
           ) : (
             <>
-              Betal {formatPriceNOK(priceOere)} med Vipps
+              Bekreft booking — {formatPriceNOK(priceOere)}
             </>
           )}
         </button>
 
         <p className="text-xs text-center text-stone-400">
-          Du blir sendt til Vipps for å fullføre betalingen.
+          Betaling med Vipps og Apple/Google Pay kommer snart.
         </p>
       </form>
     </>
